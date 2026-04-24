@@ -1,6 +1,9 @@
 import express from 'express';
-
 const app = express();
+
+const port = 3000
+
+
 const api = [{
   "current_user_url": "https://api.github.com/user",
   "current_user_authorizations_html_url": "https://github.com/settings/connections/applications{/client_id}",
@@ -50,7 +53,10 @@ const jokes = [{
     content: "Upesh is most Ledaa" 
 }]
 
-const PORT = process.env.PORT;
+app.get('/',(req, res) => {
+    res.send("WELCOME");
+
+}) 
 
 app.get('/api/github',(req, res) => {
     res.json(api);
@@ -62,6 +68,6 @@ app.get('/jokes',(req, res) => {
 
 }) 
 
-app.listen(PORT, () => {
-    console.log("server is running at port: ", PORT);
+app.listen(3000 , () =>{
+    console.log(`Example app listening on port ${port} `);
 })
