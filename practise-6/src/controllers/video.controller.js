@@ -71,6 +71,59 @@ const getAllVideos = asyncHandler(async (req, res) => {
             $limit: Number(limit)
         }
     ])
+     const totalVideos = await Video.countDocuments(matchCondition)
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                videos,
+                totalVideos,
+                currentPage: Number(page),
+                totalPages: Math.ceil(totalVideos / limit)
+            },
+            "Videos fetched successfully"
+        )
+    )
+})
+
+const publishAVideo = asyncHandler(async(req, res) => {
+    const {title, description} = req.body
+    const videoFile = req.files?.videoFile?.[0]
+    const thumbnail = req.files?.videoFile?.[0]
+
+    if(!title || !description || !videoFile || !thumbnail){
+        throw new ApiError(400, "Title, description, video and thumbnail are required")
+    }
+
+    const uploadedVideo = await uploadOnCloudinary(videoFile.path)
+    const uploadedThumbnail = await uploadOnCloudinary(thumbnail.path)
+
+    if(!uploadedVideo || !uploadedThumbnail){
+        throw new ApiError(500, "Video or thumbnail upload failed")
+    }
+
+    const video = await Video.create({
+        title,
+        description,
+        videoFile: uploadedVideo.url,
+        thumbnail: uploadedThumbnail.url,
+        duration: uploadedVideo.duration || 0 ,
+        owner: req.user?._id,
+        isPublished: true
+    })
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(
+        201,
+        video,
+        "Video published Successfully"
+    )
+    )
 })
 
 export {
